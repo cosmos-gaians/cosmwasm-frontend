@@ -16,3 +16,8 @@ export interface IProposalJson {
   type: string;
   threshold: number;
 }
+
+export interface ITokenBalance {
+  denom: string;
+  amount: string;
+}

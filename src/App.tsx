@@ -3,7 +3,7 @@ import * as PropTypes from "prop-types";
 import styled from "styled-components";
 import { Route, Switch, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import Admin from "./pages/Admin";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Notification from "./components/Notification";
 import ModalController from "./modals";
@@ -39,7 +39,7 @@ class App extends React.Component<any, any> {
       <SLayout>
         <SContent>
           <Switch>
-            <Route component={Admin} />
+            <Route component={Dashboard} />
             <Route component={NotFound} />
           </Switch>
         </SContent>

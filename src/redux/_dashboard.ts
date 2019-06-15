@@ -9,6 +9,7 @@ import {
 import { logRedux } from "../helpers/dev";
 import { loadKeys } from "../helpers/keystore";
 import { IWallet } from "../helpers/types";
+import { apiGetBalances } from "../helpers/api";
 
 // -- Constants ------------------------------------------------------------- //
 const DASHBOARD_AUTHENTICATE_REQUEST =
@@ -35,12 +36,15 @@ export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
   try {
     const address = wallet.cosmosAddress;
 
+    const balances = await apiGetBalances(address);
+
     dispatch({
       type: DASHBOARD_AUTHENTICATE_SUCCESS,
       payload: {
         name,
         address,
-        wallet
+        wallet,
+        balances
       }
     });
   } catch (error) {
@@ -120,7 +124,7 @@ const INITIAL_STATE = {
   address: "",
   name: "",
   wallet: null,
-  balance: "",
+  balances: [],
   groups: [],
   proposals: [],
   contracts: []
@@ -138,13 +142,13 @@ export default (state = INITIAL_STATE, action: any) => {
         loading: false,
         name: action.payload.name,
         address: action.payload.address,
-        wallet: action.payload.wallet
+        wallet: action.payload.wallet,
+        balances: action.payload.balances
       };
     case DASHBOARD_AUTHENTICATE_FAILURE:
       return { ...state, loading: false };
     case DASHBOARD_UPDATE_NAME:
       return { ...state, name: action.payload };
-
     case DASHBOARD_CLEAR_STATE:
       return { ...state, ...INITIAL_STATE };
     default:
