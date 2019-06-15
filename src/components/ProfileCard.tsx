@@ -50,7 +50,7 @@ const ProfileCard = (props: any) => {
     <SProfileCard>
       <SProfileLogo size={size} src={user} alt="Logo" />
       <SProfileDetails>
-        <SProfileName size={size}>{name || `Profile`}</SProfileName>
+        <SProfileName size={size}>{name}</SProfileName>
         <SProfileAddress size={size}>{ellipseText(address)}</SProfileAddress>
       </SProfileDetails>
     </SProfileCard>

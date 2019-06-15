@@ -2,8 +2,6 @@ import * as React from "react";
 import styled from "styled-components";
 import Input from "../components/Input";
 import Button from "../components/Button";
-import UploadToIpfs from "../components/UploadToIpfs";
-import { isNaN } from "../helpers/bignumber";
 
 const SSubmitWrapper = styled.div`
   width: 100%;
@@ -51,17 +49,10 @@ class GroupModal extends React.Component<IGroupModalProps, any> {
     return (
       <React.Fragment>
         <h6>{`Create Group`}</h6>
-        <UploadToIpfs
-          size={200}
-          label={`Image`}
-          image={this.state.image}
-          onUpload={(image: string) => this.updateState({ image })}
-        />
-
         <Input
           type="text"
           label="Name"
-          placeholder="Espresso"
+          placeholder="Group name"
           value={this.state.name}
           onChange={(e: any) => {
             const name = e.target.value;
@@ -73,27 +64,13 @@ class GroupModal extends React.Component<IGroupModalProps, any> {
         <Input
           type="text"
           label="Description"
-          placeholder="Small cup with 1 shot"
+          placeholder="Group description"
           value={this.state.description}
           onChange={(e: any) =>
             this.updateState({
               description: e.target.value
             })
           }
-        />
-
-        <Input
-          type="text"
-          label="Price"
-          placeholder="2.50"
-          value={`${this.state.price}`}
-          onChange={(e: any) => {
-            const price = e.target.value;
-            if (price && isNaN(price)) {
-              return;
-            }
-            this.updateState({ price });
-          }}
         />
 
         <SSubmitWrapper>

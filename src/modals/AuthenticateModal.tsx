@@ -68,13 +68,8 @@ class AuthenticateModal extends React.Component<
     this.props.notificationShow(message, true);
 
   public onSubmit = () => {
-    const {
-      createNew,
-      selectedKey,
-      name,
-      password,
-      confirmPassword
-    } = this.state;
+    let { name } = this.state;
+    const { createNew, selectedKey, password, confirmPassword } = this.state;
     let wallet = null;
     if (createNew) {
       if (!name) {
@@ -101,7 +96,8 @@ class AuthenticateModal extends React.Component<
         return this.notify(`Password is smaller than 8 characters`);
       }
       try {
-        wallet = getKey(selectedKey.name, password);
+        name = selectedKey.name;
+        wallet = getKey(name, password);
       } catch (error) {
         return this.notify(`Password is incorrect`);
       }
