@@ -1,6 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { connect } from "react-redux";
+import { dashboardShowAuthenticateModal } from "../../redux/_dashboard";
 import Button from "../../components/Button";
 import ProfileCard from "../../components/ProfileCard";
 import { colors, shadows } from "../../styles";
@@ -10,6 +11,8 @@ import {
   HEADER_SIZE,
   CONTENT_PADDING
 } from "../../constants/dashboard";
+import { STitle } from "src/components/common";
+import { formatDisplayAmount } from "src/helpers/utilities";
 
 const SHeader = styled.div`
   position: fixed;
@@ -44,23 +47,41 @@ const SHeaderRight = styled(SHeaderSection)`
   align-items: flex-end;
 `;
 
-const SMenuButton = styled(Button)`
+const SLoginButton = styled(Button)`
+  max-width: 145px;
   font-size: 16px;
 `;
 
 const Header = (props: any) => {
+  const { name, address, wallet, balance } = props;
   return (
     <SHeader>
       <SHeaderLeft>
-        <ProfileCard name={props.name} />
+        {wallet && <ProfileCard name={name} address={address} />}
       </SHeaderLeft>
       <SHeaderRight>
-        <Link to="/overview">
-          <SMenuButton>{"Go To Profile"}</SMenuButton>
-        </Link>
+        {!wallet ? (
+          <SLoginButton onClick={props.dashboardShowAuthenticateModal}>
+            {"Login"}
+          </SLoginButton>
+        ) : (
+          <React.Fragment>
+            {balance && <STitle>{formatDisplayAmount(balance, "MINT")}</STitle>}
+          </React.Fragment>
+        )}
       </SHeaderRight>
     </SHeader>
   );
 };
 
-export default Header;
+const reduxProps = (store: any) => ({
+  name: store.dashboard.name,
+  address: store.dashboard.address,
+  wallet: store.dashboard.wallet,
+  balance: store.dashboard.balance
+});
+
+export default connect(
+  reduxProps,
+  { dashboardShowAuthenticateModal }
+)(Header);

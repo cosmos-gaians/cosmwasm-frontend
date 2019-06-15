@@ -1,7 +1,7 @@
 export const colors = {
   white: "255, 255, 255",
   black: "0, 0, 0",
-  dark: "45, 42, 42",
+  dark: "21, 20, 22",
   darkGrey: "113, 119, 138",
   grey: "155, 177, 187",
   grey45: "115, 115, 115",

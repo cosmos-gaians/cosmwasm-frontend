@@ -3,14 +3,20 @@ import { notificationShow } from "./_notification";
 import {
   GROUPS_MODAL,
   PROPOSALS_MODAL,
-  CONTRACTS_MODAL
+  CONTRACTS_MODAL,
+  AUTHENTICATE_MODAL
 } from "../constants/modals";
 import { logRedux } from "../helpers/dev";
+import { loadKeys } from "../helpers/keystore";
+import { IWallet } from "../helpers/types";
 
 // -- Constants ------------------------------------------------------------- //
-const DASHBOARD_CONNECT_REQUEST = "dashboard/DASHBOARD_CONNECT_REQUEST";
-const DASHBOARD_CONNECT_SUCCESS = "dashboard/DASHBOARD_CONNECT_SUCCESS";
-const DASHBOARD_CONNECT_FAILURE = "dashboard/DASHBOARD_CONNECT_FAILURE";
+const DASHBOARD_AUTHENTICATE_REQUEST =
+  "dashboard/DASHBOARD_AUTHENTICATE_REQUEST";
+const DASHBOARD_AUTHENTICATE_SUCCESS =
+  "dashboard/DASHBOARD_AUTHENTICATE_SUCCESS";
+const DASHBOARD_AUTHENTICATE_FAILURE =
+  "dashboard/DASHBOARD_AUTHENTICATE_FAILURE";
 
 const DASHBOARD_UPDATE_NAME = "dashboard/DASHBOARD_UPDATE_NAME";
 
@@ -18,18 +24,19 @@ const DASHBOARD_CLEAR_STATE = "dashboard/DASHBOARD_CLEAR_STATE";
 
 // -- Actions --------------------------------------------------------------- //
 
-export const dashboardConnectWallet = (provider: any) => async (
+export const dashboardShowAuthenticateModal = () => async (dispatch: any) =>
+  dispatch(modalShow(AUTHENTICATE_MODAL, { keys: loadKeys() }));
+
+export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
   dispatch: any,
   getState: any
 ) => {
-  dispatch({ type: DASHBOARD_CONNECT_REQUEST });
+  dispatch({ type: DASHBOARD_AUTHENTICATE_REQUEST });
   try {
-    const name = "";
-    const address = "";
-    const wallet = null;
+    const address = wallet.cosmosAddress;
 
     dispatch({
-      type: DASHBOARD_CONNECT_SUCCESS,
+      type: DASHBOARD_AUTHENTICATE_SUCCESS,
       payload: {
         name,
         address,
@@ -39,7 +46,7 @@ export const dashboardConnectWallet = (provider: any) => async (
   } catch (error) {
     console.error(error); // tslint:disable-line
     dispatch(notificationShow(error.message, true));
-    dispatch({ type: DASHBOARD_CONNECT_FAILURE });
+    dispatch({ type: DASHBOARD_AUTHENTICATE_FAILURE });
   }
 };
 
@@ -112,16 +119,20 @@ const INITIAL_STATE = {
   loading: false,
   address: "",
   name: "",
-  wallet: null
+  wallet: null,
+  balance: "",
+  groups: [],
+  proposals: [],
+  contracts: []
 };
 
 export default (state = INITIAL_STATE, action: any) => {
   // TODO: DELETE THIS
   logRedux(action);
   switch (action.type) {
-    case DASHBOARD_CONNECT_REQUEST:
+    case DASHBOARD_AUTHENTICATE_REQUEST:
       return { ...state, loading: true };
-    case DASHBOARD_CONNECT_SUCCESS:
+    case DASHBOARD_AUTHENTICATE_SUCCESS:
       return {
         ...state,
         loading: false,
@@ -129,7 +140,7 @@ export default (state = INITIAL_STATE, action: any) => {
         address: action.payload.address,
         wallet: action.payload.wallet
       };
-    case DASHBOARD_CONNECT_FAILURE:
+    case DASHBOARD_AUTHENTICATE_FAILURE:
       return { ...state, loading: false };
     case DASHBOARD_UPDATE_NAME:
       return { ...state, name: action.payload };

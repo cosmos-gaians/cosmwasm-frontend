@@ -6,13 +6,15 @@ import {
   PLAIN_MESSAGE_MODAL,
   GROUPS_MODAL,
   PROPOSALS_MODAL,
-  CONTRACTS_MODAL
+  CONTRACTS_MODAL,
+  AUTHENTICATE_MODAL
 } from "../constants/modals";
 
 import PlainMessage from "./PlainMessage";
 import GroupModal from "./GroupModal";
 import ProposalModal from "./ProposalModal";
 import ContractModal from "./ContractModal";
+import AuthenticateModal from "./AuthenticateModal";
 
 class ModalController extends React.Component<any, any> {
   public renderModal() {
@@ -26,6 +28,9 @@ class ModalController extends React.Component<any, any> {
         return <ProposalModal {...modalProps} />;
       case CONTRACTS_MODAL:
         return <ContractModal {...modalProps} />;
+      case AUTHENTICATE_MODAL:
+        return <AuthenticateModal {...modalProps} />;
+
       default:
         return <div />;
     }
