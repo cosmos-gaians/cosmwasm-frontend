@@ -10,6 +10,7 @@ import { notificationShow } from "../redux/_notification";
 import { modalHide } from "../redux/_modal";
 import { addNewKey, getKey } from "../helpers/keystore";
 import { IKeyStore, IWallet } from "../helpers/types";
+import { isEmptyArray } from "../helpers/utilities";
 
 const SSubmitWrapper = styled.div`
   width: 100%;
@@ -48,17 +49,13 @@ const plainKey = {
   wallet: ""
 };
 
-function isEmpty(array: any[]) {
-  return !(array && array.length);
-}
-
 class AuthenticateModal extends React.Component<
   IAuthenticateModalProps,
   IAuthenticateModalState
 > {
   public state = {
-    createNew: isEmpty(this.props.keys),
-    selectedKey: !isEmpty(this.props.keys) ? this.props.keys[0] : plainKey,
+    createNew: isEmptyArray(this.props.keys),
+    selectedKey: !isEmptyArray(this.props.keys) ? this.props.keys[0] : plainKey,
     name: "",
     password: "",
     confirmPassword: ""
@@ -67,7 +64,10 @@ class AuthenticateModal extends React.Component<
   public notify = (message: string) =>
     this.props.notificationShow(message, true);
 
-  public onSubmit = () => {
+  public onSubmit = (e: any) => {
+    if (e) {
+      e.preventDefault();
+    }
     let { name } = this.state;
     const { createNew, selectedKey, password, confirmPassword } = this.state;
     let wallet = null;
@@ -123,7 +123,7 @@ class AuthenticateModal extends React.Component<
       <Form onSubmit={this.onSubmit}>
         <h6>{`Authenticate`}</h6>
 
-        {!createNew && !isEmpty(keys) ? (
+        {!createNew && !isEmptyArray(keys) ? (
           <React.Fragment>
             <Dropdown
               label="Keys"
@@ -140,7 +140,7 @@ class AuthenticateModal extends React.Component<
                 const matches = keys.filter(
                   (key: IKeyStore) => key.address === address
                 );
-                if (!isEmpty(this.props.keys)) {
+                if (!isEmptyArray(this.props.keys)) {
                   selectedKey = matches[0];
                   this.setState({ selectedKey });
                 } else {

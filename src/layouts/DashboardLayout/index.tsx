@@ -89,7 +89,7 @@ function isFixedScroll(match: any) {
   return fixedScroll;
 }
 
-const Dashboard = (props: any) => {
+const DashboardLayout = (props: any) => {
   const { children, match, loading } = props;
   const fixedScroll = isFixedScroll(match);
   return (
@@ -110,7 +110,7 @@ const Dashboard = (props: any) => {
   );
 };
 
-Dashboard.propTypes = {
+DashboardLayout.propTypes = {
   children: PropTypes.node.isRequired,
   match: PropTypes.object.isRequired,
   loading: PropTypes.bool.isRequired,
@@ -118,9 +118,9 @@ Dashboard.propTypes = {
   maxWidth: PropTypes.number
 };
 
-Dashboard.defaultProps = {
+DashboardLayout.defaultProps = {
   center: false,
   maxWidth: undefined
 };
 
-export default Dashboard;
+export default DashboardLayout;

@@ -19,21 +19,21 @@ const Summary = (props: any) => {
         <React.Fragment>
           <SSummaryRow>
             <div>{`Sub Total`}</div>
-            <div>{formatDisplayAmount(checkout.subtotal, "MINT")}</div>
+            <div>{formatDisplayAmount(checkout.subtotal, "WASM")}</div>
           </SSummaryRow>
           <SSummaryRow>
             <div>{`Tax`}</div>
-            <div>{formatDisplayAmount(checkout.tax, "MINT")}</div>
+            <div>{formatDisplayAmount(checkout.tax, "WASM")}</div>
           </SSummaryRow>
           <SSummaryRow>
             <div>{`Net Total`}</div>
-            <div>{formatDisplayAmount(checkout.nettotal, "MINT")}</div>
+            <div>{formatDisplayAmount(checkout.nettotal, "WASM")}</div>
           </SSummaryRow>
         </React.Fragment>
       ) : (
         <SSummaryRow>
           <div>{`Total`}</div>
-          <div>{formatDisplayAmount(checkout.rawtotal, "MINT")}</div>
+          <div>{formatDisplayAmount(checkout.rawtotal, "WASM")}</div>
         </SSummaryRow>
       )}
     </React.Fragment>

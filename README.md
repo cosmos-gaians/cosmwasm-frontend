@@ -1,3 +1,3 @@
-# faxion-frontend
+# cosmwasm-frontend
 
-Faxion - Multisigner DAO
+CosmWasm - Advanced MultiSig Interface

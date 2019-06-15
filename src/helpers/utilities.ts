@@ -2,6 +2,7 @@ import sha256 from "crypto-js/sha256";
 import { handleSignificantDecimals } from "./bignumber";
 import { APP_DESCRIPTION, APP_NAME } from "../constants/appMeta";
 import { isIpfsHash, getIpfsUrl } from "./ipfs";
+import { ITokenBalance } from "./types";
 
 export function capitalize(string: string): string {
   return string
@@ -135,7 +136,7 @@ export function uuid(): string {
 }
 
 export function formatDisplayAmount(
-  amount: number,
+  amount: number | string,
   symbol: string,
   decimals: number = 2
 ) {
@@ -247,4 +248,24 @@ export function stringToHexColor(str: string) {
   const integer = hashToInteger(hash);
   const hexColor = integerToHexColor(integer);
   return hexColor;
+}
+
+export function isEmptyArray(array: any[]) {
+  return !(array && array.length);
+}
+
+export function getTokenBalance(
+  balances: ITokenBalance[],
+  denom: string
+): string {
+  let tokenBalance = "";
+
+  if (!isEmptyArray(balances)) {
+    const matches = balances.filter(token => token.denom === denom);
+    if (!isEmptyArray(matches)) {
+      tokenBalance = matches[0].amount;
+    }
+  }
+
+  return tokenBalance;
 }

@@ -12,7 +12,7 @@ import {
   CONTENT_PADDING
 } from "../../constants/dashboard";
 import { STitle } from "src/components/common";
-import { formatDisplayAmount } from "src/helpers/utilities";
+import { formatDisplayAmount, getTokenBalance } from "src/helpers/utilities";
 
 const SHeader = styled.div`
   position: fixed;
@@ -53,7 +53,9 @@ const SLoginButton = styled(Button)`
 `;
 
 const Header = (props: any) => {
-  const { name, address, wallet, balance } = props;
+  const { name, address, wallet, balances } = props;
+  const wasmDenom = "wasm";
+  const wasmBalance = getTokenBalance(balances, wasmDenom) || "0";
   return (
     <SHeader>
       <SHeaderLeft>
@@ -66,7 +68,11 @@ const Header = (props: any) => {
           </SLoginButton>
         ) : (
           <React.Fragment>
-            {balance && <STitle>{formatDisplayAmount(balance, "MINT")}</STitle>}
+            {wasmBalance && (
+              <STitle>
+                {formatDisplayAmount(wasmBalance, wasmDenom.toUpperCase())}
+              </STitle>
+            )}
           </React.Fragment>
         )}
       </SHeaderRight>
@@ -78,7 +84,7 @@ const reduxProps = (store: any) => ({
   name: store.dashboard.name,
   address: store.dashboard.address,
   wallet: store.dashboard.wallet,
-  balance: store.dashboard.balance
+  balances: store.dashboard.balances
 });
 
 export default connect(

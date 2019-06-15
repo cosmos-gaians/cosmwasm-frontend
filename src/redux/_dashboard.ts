@@ -8,7 +8,7 @@ import {
 } from "../constants/modals";
 import { logRedux } from "../helpers/dev";
 import { loadKeys } from "../helpers/keystore";
-import { IWallet } from "../helpers/types";
+import { IWallet, ITokenBalance } from "../helpers/types";
 import { apiGetBalances } from "../helpers/api";
 
 // -- Constants ------------------------------------------------------------- //
@@ -36,7 +36,14 @@ export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
   try {
     const address = wallet.cosmosAddress;
 
-    const balances = await apiGetBalances(address);
+    let balances: ITokenBalance[] = [];
+
+    try {
+      balances = await apiGetBalances(address);
+    } catch (error) {
+      console.error(error); // tslint:disable-line
+      dispatch(notificationShow(`Failed to get balances`, true));
+    }
 
     dispatch({
       type: DASHBOARD_AUTHENTICATE_SUCCESS,

@@ -139,7 +139,7 @@ const ListItem = ({
           <SListItemDescription>{item.description}</SListItemDescription>
         </SListItemText>
       </SListItemDetails>
-      <SListItemPrice>{formatDisplayAmount(item.price, "MINT")}</SListItemPrice>
+      <SListItemPrice>{formatDisplayAmount(item.price, "WASM")}</SListItemPrice>
     </SListItemContainer>
     {actions && actions.length && (
       <SListItemActions>

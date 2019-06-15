@@ -2,14 +2,14 @@ import * as React from "react";
 import * as PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Route, Switch, Redirect } from "react-router-dom";
-import Dashboard from "../../layouts/Dashboard";
+import DashboardLayout from "../../layouts/DashboardLayout";
 
 import Profile from "./Profile";
 import Groups from "./Groups";
 import Proposals from "./Proposals";
 import Contracts from "./Contracts";
 
-class Admin extends React.Component<any, any> {
+class Dashboard extends React.Component<any, any> {
   public static propTypes = {
     match: PropTypes.object.isRequired,
     loading: PropTypes.bool.isRequired,
@@ -19,7 +19,7 @@ class Admin extends React.Component<any, any> {
   public render() {
     const { match, loading } = this.props;
     return (
-      <Dashboard match={match} loading={loading}>
+      <DashboardLayout match={match} loading={loading}>
         <Switch>
           <Route exact path={match.url} component={Profile} />
           <Route exact path={`/groups`} component={Groups} />
@@ -27,7 +27,7 @@ class Admin extends React.Component<any, any> {
           <Route exact path={`/contracts`} component={Contracts} />
           <Route render={() => <Redirect to={match.url} />} />
         </Switch>
-      </Dashboard>
+      </DashboardLayout>
     );
   }
 }
@@ -40,4 +40,4 @@ const reduxProps = (store: any) => ({
 export default connect(
   reduxProps,
   null
-)(Admin);
+)(Dashboard);
