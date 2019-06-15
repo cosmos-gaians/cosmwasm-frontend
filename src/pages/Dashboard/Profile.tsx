@@ -1,10 +1,10 @@
 import * as React from "react";
-import { SCenter } from "../../components/common";
+import EmptyState from "../../components/EmptyState";
 
 const Profile = (props: any) => (
-  <SCenter>
-    <h4>{"Profile"}</h4>
-  </SCenter>
+  <React.Fragment>
+    <EmptyState message={`Profile`} />
+  </React.Fragment>
 );
 
 export default Profile;
