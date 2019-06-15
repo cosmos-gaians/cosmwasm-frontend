@@ -11,12 +11,7 @@ import { globalStyle } from "./styles";
 declare global {
   // tslint:disable-next-line
   interface Window {
-    ethereum: any;
-    web3: any;
     browserHistory: any;
-    Box: any;
-    box: any;
-    space: any;
   }
 }
 
