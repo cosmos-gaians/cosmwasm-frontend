@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { dashboardShowProposalsModal } from "../../redux/_dashboard";
-import ListItem from "../../components/ListItem";
+
 import EmptyState from "../../components/EmptyState";
 import { SColumnList } from "../../components/common";
 import Button from "../../components/Button";
@@ -18,7 +18,7 @@ const SProposalsList = styled(SColumnList)`
   padding: 0;
 `;
 
-const SListItem = styled(ListItem)`
+const SListItem = styled.div`
   margin: 20px;
   margin-bottom: 0;
   &:last-child {
@@ -40,10 +40,11 @@ const Proposals = (props: IProposalsProps) => {
         <SProposalsList>
           {proposals.map((item: any) => (
             <SListItem
-              key={`proposal-${item.name}`}
-              item={item}
+              key={`group-${item.name}`}
               onClick={() => props.dashboardShowProposalsModal(item)}
-            />
+            >
+              {item}
+            </SListItem>
           ))}
         </SProposalsList>
       ) : (

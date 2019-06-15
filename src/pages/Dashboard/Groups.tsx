@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { dashboardShowGroupsModal } from "../../redux/_dashboard";
-import ListItem from "../../components/ListItem";
+
 import EmptyState from "../../components/EmptyState";
 import { SColumnList } from "../../components/common";
 import Button from "../../components/Button";
@@ -18,7 +18,7 @@ const SGroupsList = styled(SColumnList)`
   padding: 0;
 `;
 
-const SListItem = styled(ListItem)`
+const SListItem = styled.div`
   margin: 20px;
   margin-bottom: 0;
   &:last-child {
@@ -41,9 +41,10 @@ const Groups = (props: IGroupsProps) => {
           {groups.map((item: any) => (
             <SListItem
               key={`group-${item.name}`}
-              item={item}
               onClick={() => props.dashboardShowGroupsModal(item)}
-            />
+            >
+              {item}
+            </SListItem>
           ))}
         </SGroupsList>
       ) : (

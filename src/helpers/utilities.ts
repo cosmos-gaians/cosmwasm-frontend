@@ -1,7 +1,5 @@
 import sha256 from "crypto-js/sha256";
 import { handleSignificantDecimals } from "./bignumber";
-import { APP_DESCRIPTION, APP_NAME } from "../constants/appMeta";
-import { isIpfsHash, getIpfsUrl } from "./ipfs";
 import { ITokenBalance } from "./types";
 
 export function capitalize(string: string): string {
@@ -143,63 +141,6 @@ export function formatDisplayAmount(
   const _amount = handleSignificantDecimals(`${amount}`, decimals);
   const result = `${_amount} ${symbol}`;
   return result;
-}
-
-export function updateTitle(title: string) {
-  if (typeof document !== "undefined") {
-    document.title = title;
-  }
-}
-
-export function updateMetaTag(name: string, attribute: string, value: string) {
-  const meta = document.querySelector(`meta[name="${name}"]`);
-  if (meta) {
-    meta.setAttribute(attribute, value);
-  }
-}
-
-export function updateFavicon(href: string) {
-  if (typeof document !== "undefined") {
-    const link: any =
-      document.querySelector("link[rel*='icon']") ||
-      document.createElement("link");
-    link.rel = "shortcut icon";
-    link.href = href;
-    document.getElementsByTagName("head")[0].appendChild(link);
-  }
-}
-
-export function updatePageMeta(meta: any) {
-  updateTitle(meta.title);
-  updateMetaTag("description", "content", meta.description);
-  updateFavicon(meta.favicon);
-}
-
-export function revertPageMeta() {
-  updateTitle(APP_NAME);
-  updateMetaTag("description", "content", APP_DESCRIPTION);
-  updateFavicon("/favicon.ico");
-}
-
-export function parseConstantString(constant: string): string {
-  let result = constant
-    .toLowerCase()
-    .split("_")
-    .join(" ");
-  result = capitalize(result);
-  return result;
-}
-
-export function formatConstantString(value: string): string {
-  const result = value
-    .toUpperCase()
-    .split(" ")
-    .join("_");
-  return result;
-}
-
-export function sanitizeImgSrc(image: string): string {
-  return isIpfsHash(image) ? getIpfsUrl(image) : image;
 }
 
 export function getCurrentPathname() {
