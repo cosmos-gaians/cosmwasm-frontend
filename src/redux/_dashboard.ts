@@ -78,11 +78,24 @@ const DASHBOARD_CLEAR_STATE = "dashboard/DASHBOARD_CLEAR_STATE";
 
 let dataInterval: any;
 
-async function getAllData(address: string) {
+function displayNotification(message: string, dispatch: any) {
+  dispatch(notificationShow(`Failed to get balances`, true));
+}
+
+async function getAllData(address: string, onError: (message: string) => void) {
+  let balances: ITokenAmount[] = [];
+
+  try {
+    balances = await apiGetBalances(address);
+  } catch (error) {
+    console.error(error); // tslint:disable-line
+    onError("Failed to get balances");
+  }
+
   const groups = await apiGetGroups(address);
   const contracts = await apiGetAllContracts();
   const proposals = await apiGetAllProposals(address);
-  return { groups, contracts, proposals };
+  return { balances, groups, contracts, proposals };
 }
 
 export const dashboardShowAuthenticateModal = () => async (dispatch: any) =>
@@ -96,16 +109,10 @@ export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
   try {
     const address = wallet.cosmosAddress;
 
-    let balances: ITokenAmount[] = [];
-
-    try {
-      balances = await apiGetBalances(address);
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      dispatch(notificationShow(`Failed to get balances`, true));
-    }
-
-    const { groups, contracts, proposals } = await getAllData(address);
+    const { balances, groups, contracts, proposals } = await getAllData(
+      address,
+      (message: string) => displayNotification(message, dispatch)
+    );
 
     dispatch({
       type: DASHBOARD_AUTHENTICATE_SUCCESS,
@@ -138,10 +145,14 @@ export const dashboardSubscribeToUpdates = () => async (
     const { address } = getState();
     dispatch({ type: DASHBOARD_UPDATE_DATA_REQUEST });
     try {
-      const { groups, contracts, proposals } = await getAllData(address);
+      const { balances, groups, contracts, proposals } = await getAllData(
+        address,
+        (message: string) => displayNotification(message, dispatch)
+      );
       dispatch({
         type: DASHBOARD_UPDATE_DATA_SUCCESS,
         payload: {
+          balances,
           groups,
           contracts,
           proposals
@@ -389,6 +400,7 @@ export default (state = INITIAL_STATE, action: any) => {
     case DASHBOARD_UPDATE_DATA_SUCCESS:
       return {
         ...state,
+        balances: action.payload.balances,
         groups: action.payload.groups,
         contracts: action.payload.contracts,
         proposals: action.payload.proposals
