@@ -25,6 +25,12 @@ interface IContractsProps {
   dashboardGetContracts: () => void;
 }
 
+function formatUniqueKey(item: IContract) {
+  return `contract-${item.verifier}-${item.beneficiary}-${item.funder}-${
+    item.payout
+  }-${Math.random()}`;
+}
+
 class Contracts extends React.Component<IContractsProps, any> {
   public componentDidMount() {
     this.props.dashboardGetContracts();
@@ -48,7 +54,7 @@ class Contracts extends React.Component<IContractsProps, any> {
             </SListItem>
             {contracts.map((item: IContract) => (
               <SListItem
-                key={`contract-${item.verifier}-${item.beneficiary}-${item.funder}-${item.payout}`}
+                key={formatUniqueKey(item)}
                 onClick={() => this.props.dashboardShowContractsModal(item)}
               >
                 <SListItemRow width={40}>
