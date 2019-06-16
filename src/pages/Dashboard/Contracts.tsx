@@ -1,12 +1,17 @@
 import * as React from "react";
 import styled from "styled-components";
 import { connect } from "react-redux";
-import { dashboardShowContractsModal } from "../../redux/_dashboard";
+import {
+  dashboardShowContractsModal,
+  dashboardGetContracts
+} from "../../redux/_dashboard";
 
 import EmptyState from "../../components/EmptyState";
-import { SColumnList } from "../../components/common";
+import { SListColumn, SListItem, SListItemRow } from "../../components/common";
 import Button from "../../components/Button";
 import { CONTENT_PADDING } from "../../constants/dashboard";
+import { IContract } from "../../helpers/types";
+import { ellipseWord } from "../../helpers/utilities";
 
 const SButtonWrapper = styled.div`
   position: fixed;
@@ -14,55 +19,68 @@ const SButtonWrapper = styled.div`
   right: ${CONTENT_PADDING * 2}px;
 `;
 
-const SContractsList = styled(SColumnList)`
-  padding: 0;
-`;
-
-const SListItem = styled.div`
-  margin: 20px;
-  margin-bottom: 0;
-  &:last-child {
-    margin-bottom: 20px;
-  }
-`;
-
 interface IContractsProps {
-  contracts: any;
-  settings: any;
-  dashboardShowContractsModal: (proposal?: any) => void;
+  contracts: IContract[];
+  dashboardShowContractsModal: (contractx?: IContract) => void;
+  dashboardGetContracts: () => void;
 }
 
-const Contracts = (props: IContractsProps) => {
-  const { contracts } = props;
-  return (
-    <React.Fragment>
-      {contracts && contracts.length ? (
-        <SContractsList>
-          {contracts.map((item: any) => (
-            <SListItem
-              key={`group-${item.name}`}
-              onClick={() => props.dashboardShowContractsModal(item)}
-            >
-              {item}
+class Contracts extends React.Component<IContractsProps, any> {
+  public componentDidMount() {
+    this.props.dashboardGetContracts();
+  }
+  public render() {
+    const { contracts } = this.props;
+    return (
+      <React.Fragment>
+        {contracts && contracts.length ? (
+          <SListColumn>
+            <SListItem noShadow>
+              <SListItemRow bold width={40}>
+                {"Verifier"}
+              </SListItemRow>
+              <SListItemRow bold width={40}>
+                {"Beneficiary"}
+              </SListItemRow>
+              <SListItemRow bold alignRight width={20}>
+                {"Payout"}
+              </SListItemRow>
             </SListItem>
-          ))}
-        </SContractsList>
-      ) : (
-        <EmptyState message={`No Contracts`} />
-      )}
-      <SButtonWrapper>
-        <Button
-          onClick={() => props.dashboardShowContractsModal()}
-        >{`Create Contract`}</Button>
-      </SButtonWrapper>
-    </React.Fragment>
-  );
-};
+            {contracts.map((item: IContract) => (
+              <SListItem
+                key={`contract-${item.verifier}-${item.beneficiary}-${item.funder}-${item.payout}`}
+                onClick={() => this.props.dashboardShowContractsModal(item)}
+              >
+                <SListItemRow width={40}>
+                  {ellipseWord(item.verifier, 20)}
+                </SListItemRow>
+                <SListItemRow width={40}>
+                  {ellipseWord(item.beneficiary, 20)}
+                </SListItemRow>
+                <SListItemRow alignRight width={20}>
+                  {item.payout}
+                </SListItemRow>
+              </SListItem>
+            ))}
+          </SListColumn>
+        ) : (
+          <EmptyState message={`No Contracts`} />
+        )}
+        <SButtonWrapper>
+          <Button
+            onClick={() => this.props.dashboardShowContractsModal()}
+          >{`Create Contract`}</Button>
+        </SButtonWrapper>
+      </React.Fragment>
+    );
+  }
+}
+
 const reduxProps = (store: any) => ({
   contracts: store.dashboard.contracts
 });
 
 export default connect(
   reduxProps,
-  { dashboardShowContractsModal }
+  { dashboardShowContractsModal, dashboardGetContracts }
 )(Contracts);

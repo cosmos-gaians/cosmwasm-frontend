@@ -13,6 +13,7 @@ import {
 } from "../../constants/dashboard";
 import { STitle } from "src/components/common";
 import { formatDisplayAmount, getTokenBalance } from "src/helpers/utilities";
+import { APP_TOKEN_DENOM } from "src/constants/appMeta";
 
 const SHeader = styled.div`
   position: fixed;
@@ -54,8 +55,8 @@ const SLoginButton = styled(Button)`
 
 const Header = (props: any) => {
   const { name, address, wallet, balances } = props;
-  const wasmDenom = "wasm";
-  const wasmBalance = getTokenBalance(balances, wasmDenom) || "0";
+  const tokenDenom = APP_TOKEN_DENOM;
+  const tokenBalance = getTokenBalance(balances, tokenDenom) || "0";
   return (
     <SHeader>
       <SHeaderLeft>
@@ -68,10 +69,8 @@ const Header = (props: any) => {
           </SLoginButton>
         ) : (
           <React.Fragment>
-            {wasmBalance && (
-              <STitle>
-                {formatDisplayAmount(wasmBalance, wasmDenom.toUpperCase())}
-              </STitle>
+            {tokenBalance && (
+              <STitle>{formatDisplayAmount(tokenBalance, tokenDenom)}</STitle>
             )}
           </React.Fragment>
         )}

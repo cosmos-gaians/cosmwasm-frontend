@@ -26,16 +26,8 @@ export function standardRandomBytesFunc(size: number) {
 
 export function generateWalletFromSeed(mnemonic: string): IWallet {
   const masterKey = deriveMasterKey(mnemonic);
-  console.log("[generateWalletFromSeed] masterKey", masterKey); // tslint:disable-line
   const { privateKey, publicKey } = deriveKeypair(masterKey);
-  // tslint:disable-next-line
-  console.log(
-    "[generateWalletFromSeed] privateKey",
-    privateKey.toString("hex")
-  );
-  console.log("[generateWalletFromSeed] publicKey", publicKey.toString("hex")); // tslint:disable-line
   const cosmosAddress = createCosmosAddress(publicKey);
-  console.log("[generateWalletFromSeed] cosmosAddress", cosmosAddress); // tslint:disable-line
   return {
     privateKey: privateKey.toString(`hex`),
     publicKey: publicKey.toString(`hex`),
@@ -45,12 +37,10 @@ export function generateWalletFromSeed(mnemonic: string): IWallet {
 
 export function generateSeed(randomBytesFunc = standardRandomBytesFunc) {
   const randomBytes = Buffer.from(randomBytesFunc(32), `hex`);
-  console.log("[generateSeed] randomBytes", randomBytes); // tslint:disable-line
   if (randomBytes.length !== 32) {
     throw Error(`Entropy has incorrect length`);
   }
   const mnemonic = bip39.entropyToMnemonic(randomBytes.toString(`hex`));
-  console.log("[generateSeed] mnemonic", mnemonic); // tslint:disable-line
 
   return mnemonic;
 }
@@ -58,9 +48,7 @@ export function generateSeed(randomBytesFunc = standardRandomBytesFunc) {
 export function generateWallet(
   randomBytesFunc = standardRandomBytesFunc
 ): IWallet {
-  console.log("[generateWallet] randomBytesFunc", randomBytesFunc); // tslint:disable-line
   const mnemonic = generateSeed(randomBytesFunc);
-  console.log("[generateWallet] mnemonic", mnemonic); // tslint:disable-line
   return generateWalletFromSeed(mnemonic);
 }
 
@@ -76,20 +64,12 @@ export function createCosmosAddress(publicKey: Buffer) {
 }
 
 function deriveMasterKey(mnemonic: string) {
-  console.log("[deriveMasterKey] mnemonic", mnemonic); // tslint:disable-line
   // throws if mnemonic is invalid
   bip39.validateMnemonic(mnemonic);
-  // tslint:disable-next-line
-  console.log(
-    "[deriveMasterKey] bip39.validateMnemonic(mnemonic)",
-    bip39.validateMnemonic(mnemonic)
-  );
 
   const seed = bip39.mnemonicToSeed(mnemonic);
 
-  console.log("[deriveMasterKey] seed", seed); // tslint:disable-line
   const masterKey = fromSeed(seed);
-  console.log("[deriveMasterKey] masterKey", masterKey); // tslint:disable-line
   return masterKey;
 }
 

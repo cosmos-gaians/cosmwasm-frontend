@@ -2,6 +2,14 @@ import * as React from "react";
 import styled from "styled-components";
 import Input from "../components/Input";
 import Button from "../components/Button";
+import { IGroup, IGroupMember } from "../helpers/types";
+import { ellipseWord } from "../helpers/utilities";
+import {
+  SLabel,
+  SListColumn,
+  SListItem,
+  SListItemRow
+} from "../components/common";
 
 const SSubmitWrapper = styled.div`
   width: 100%;
@@ -18,71 +26,88 @@ const SSubmitWrapper = styled.div`
 `;
 
 interface IGroupModalProps {
-  groupJson: any;
-  onAddItem: (groupJson: any) => void;
-  onRemoveItem: (groupJson: any) => void;
+  group: IGroup;
+  onAddItem: (Group: IGroup, isNew: boolean) => void;
 }
 
-class GroupModal extends React.Component<IGroupModalProps, any> {
-  public state = {
-    id: this.props.groupJson ? this.props.groupJson.id : "",
-    name: this.props.groupJson ? this.props.groupJson.name : "",
-    description: this.props.groupJson ? this.props.groupJson.description : "",
-    price: this.props.groupJson ? this.props.groupJson.price : 0,
-    image: this.props.groupJson ? this.props.groupJson.image : ""
-  };
+interface IGroupModalState extends IGroup {
+  isNew: boolean;
+}
 
-  public updateState = (updatedGroupJson: any) =>
-    this.setState({ ...this.state, ...updatedGroupJson });
+class GroupModal extends React.Component<IGroupModalProps, IGroupModalState> {
+  public state = {
+    isNew: !this.props.group,
+    ID: this.props.group ? this.props.group.ID : "",
+    members: this.props.group ? this.props.group.members : [],
+    decision_threshold: this.props.group
+      ? this.props.group.decision_threshold
+      : ""
+  };
 
   public onSubmit = () => {
-    const { id, name, description, price, image } = this.state;
-    this.props.onAddItem({ id, name, description, price, image });
-  };
-
-  public onRemove = () => {
-    const { id, name, description, price, image } = this.state;
-    this.props.onRemoveItem({ id, name, description, price, image });
+    const { isNew, ID, members, decision_threshold } = this.state;
+    this.props.onAddItem({ ID, members, decision_threshold }, isNew);
   };
 
   public render() {
+    const { isNew, members, decision_threshold } = this.state;
+    const action = isNew ? "Create Group" : "Group";
+    const readOnly = !isNew;
     return (
       <React.Fragment>
-        <h6>{`Create Group`}</h6>
-        <Input
-          type="text"
-          label="Name"
-          placeholder="Group name"
-          value={this.state.name}
-          onChange={(e: any) => {
-            const name = e.target.value;
-            const id = name;
-            this.updateState({ name, id });
-          }}
-        />
+        <h6>{action}</h6>
 
         <Input
+          readOnly={readOnly}
           type="text"
-          label="Description"
-          placeholder="Group description"
-          value={this.state.description}
-          onChange={(e: any) =>
-            this.updateState({
-              description: e.target.value
-            })
-          }
+          label="Threshold"
+          placeholder="Threshold"
+          value={decision_threshold}
+          onChange={(e: any) => this.setState({ decision_threshold })}
         />
 
-        <SSubmitWrapper>
-          {this.props.groupJson ? (
-            <React.Fragment>
-              <Button color={`red`} onClick={this.onRemove}>{`Delete`}</Button>
-              <Button onClick={this.onSubmit}>{`Update`}</Button>
-            </React.Fragment>
-          ) : (
-            <Button onClick={this.onSubmit}>{`Submit`}</Button>
-          )}
-        </SSubmitWrapper>
+        {isNew ? (
+          <Input
+            readOnly={readOnly}
+            type="text"
+            label="Members (CSV)"
+            placeholder="Members"
+            value={members.toString()}
+            onChange={(e: any) =>
+              this.setState({ members: e.target.value.replace(/[,;]/gi) })
+            }
+          />
+        ) : (
+          <React.Fragment>
+            <SLabel>{`Members`}</SLabel>
+            <SListColumn>
+              <SListItem noShadow>
+                <SListItemRow bold width={80}>
+                  {"Address"}
+                </SListItemRow>
+                <SListItemRow bold alignRight width={20}>
+                  {"Weight"}
+                </SListItemRow>
+              </SListItem>
+              {members.map((member: IGroupMember) => (
+                <SListItem key={`member-${member.address}`}>
+                  <SListItemRow bold width={80}>
+                    {ellipseWord(member.address, 40)}
+                  </SListItemRow>
+                  <SListItemRow bold alignRight width={20}>
+                    {member.weight}
+                  </SListItemRow>
+                </SListItem>
+              ))}
+            </SListColumn>
+          </React.Fragment>
+        )}
+
+        {isNew && (
+          <SSubmitWrapper>
+            <Button onClick={this.onSubmit}>{action}</Button>
+          </SSubmitWrapper>
+        )}
       </React.Fragment>
     );
   }

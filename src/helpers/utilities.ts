@@ -1,12 +1,17 @@
 import sha256 from "crypto-js/sha256";
 import { handleSignificantDecimals } from "./bignumber";
-import { ITokenBalance } from "./types";
+import { ITokenAmount } from "./types";
 
 export function capitalize(string: string): string {
   return string
     .split(" ")
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+}
+
+export function ellipseWord(word: string = "", maxLength: number = 9999) {
+  const _maxLength = maxLength - 3;
+  return word.substr(0, _maxLength) + "...";
 }
 
 export function ellipseText(
@@ -196,13 +201,15 @@ export function isEmptyArray(array: any[]) {
 }
 
 export function getTokenBalance(
-  balances: ITokenBalance[],
+  balances: ITokenAmount[],
   denom: string
 ): string {
   let tokenBalance = "";
 
   if (!isEmptyArray(balances)) {
-    const matches = balances.filter(token => token.denom === denom);
+    const matches = balances.filter(
+      token => token.denom.toLowerCase() === denom.toLowerCase()
+    );
     if (!isEmptyArray(matches)) {
       tokenBalance = matches[0].amount;
     }

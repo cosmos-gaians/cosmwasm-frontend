@@ -8,8 +8,15 @@ import {
 } from "../constants/modals";
 import { logRedux } from "../helpers/dev";
 import { loadKeys } from "../helpers/keystore";
-import { IWallet, ITokenBalance, IContract } from "../helpers/types";
-import { apiGetBalances, apiCreateContract } from "../helpers/api";
+import { IWallet, ITokenAmount, IContract, IGroup } from "../helpers/types";
+import {
+  apiGetBalances,
+  apiCreateContract,
+  apiGetAllContracts,
+  apiGetGroups,
+  apiCreateGroup,
+  apiGetAllProposals
+} from "../helpers/api";
 
 // -- Constants ------------------------------------------------------------- //
 const DASHBOARD_AUTHENTICATE_REQUEST =
@@ -18,6 +25,31 @@ const DASHBOARD_AUTHENTICATE_SUCCESS =
   "dashboard/DASHBOARD_AUTHENTICATE_SUCCESS";
 const DASHBOARD_AUTHENTICATE_FAILURE =
   "dashboard/DASHBOARD_AUTHENTICATE_FAILURE";
+
+const DASHBOARD_GET_GROUPS_REQUEST = "dashboard/DASHBOARD_GET_GROUPS_REQUEST";
+const DASHBOARD_GET_GROUPS_SUCCESS = "dashboard/DASHBOARD_GET_GROUPS_SUCCESS";
+const DASHBOARD_GET_GROUPS_FAILURE = "dashboard/DASHBOARD_GET_GROUPS_FAILURE";
+
+const DASHBOARD_GET_CONTRACTS_REQUEST =
+  "dashboard/DASHBOARD_GET_CONTRACTS_REQUEST";
+const DASHBOARD_GET_CONTRACTS_SUCCESS =
+  "dashboard/DASHBOARD_GET_CONTRACTS_SUCCESS";
+const DASHBOARD_GET_CONTRACTS_FAILURE =
+  "dashboard/DASHBOARD_GET_CONTRACTS_FAILURE";
+
+const DASHBOARD_CREATE_GROUP_REQUEST =
+  "dashboard/DASHBOARD_CREATE_GROUP_REQUEST";
+const DASHBOARD_CREATE_GROUP_SUCCESS =
+  "dashboard/DASHBOARD_CREATE_GROUP_SUCCESS";
+const DASHBOARD_CREATE_GROUP_FAILURE =
+  "dashboard/DASHBOARD_CREATE_GROUP_FAILURE";
+
+const DASHBOARD_GET_PROPOSALS_REQUEST =
+  "dashboard/DASHBOARD_GET_PROPOSALS_REQUEST";
+const DASHBOARD_GET_PROPOSALS_SUCCESS =
+  "dashboard/DASHBOARD_GET_PROPOSALS_SUCCESS";
+const DASHBOARD_GET_PROPOSALS_FAILURE =
+  "dashboard/DASHBOARD_GET_PROPOSALS_FAILURE";
 
 const DASHBOARD_CREATE_CONTRACT_REQUEST =
   "dashboard/DASHBOARD_CREATE_CONTRACT_REQUEST";
@@ -50,7 +82,7 @@ export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
   try {
     const address = wallet.cosmosAddress;
 
-    let balances: ITokenBalance[] = [];
+    let balances: ITokenAmount[] = [];
 
     try {
       balances = await apiGetBalances(address);
@@ -59,13 +91,20 @@ export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
       dispatch(notificationShow(`Failed to get balances`, true));
     }
 
+    const groups = await apiGetGroups(address);
+    const contracts = await apiGetAllContracts();
+    const proposals = await apiGetAllProposals(address);
+
     dispatch({
       type: DASHBOARD_AUTHENTICATE_SUCCESS,
       payload: {
         name,
         address,
         wallet,
-        balances
+        balances,
+        groups,
+        contracts,
+        proposals
       }
     });
   } catch (error) {
@@ -75,24 +114,88 @@ export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
   }
 };
 
-export const dashboardShowGroupsModal = (groupJson?: any) => async (
+export const dashboardGetGroups = () => async (
+  dispatch: any,
+  getState: any
+) => {
+  const { address } = getState().dashboard;
+  if (!address) {
+    return;
+  }
+  dispatch({ type: DASHBOARD_GET_GROUPS_REQUEST });
+  try {
+    const groups = await apiGetGroups(address);
+    dispatch({
+      type: DASHBOARD_GET_GROUPS_SUCCESS,
+      payload: groups
+    });
+  } catch (error) {
+    console.error(error); // tslint:disable-line
+    dispatch(notificationShow(error.message, true));
+    dispatch({ type: DASHBOARD_GET_GROUPS_FAILURE });
+  }
+};
+
+export const dashboardGetContracts = () => async (
+  dispatch: any,
+  getState: any
+) => {
+  const { address } = getState().dashboard;
+  if (!address) {
+    return;
+  }
+  dispatch({ type: DASHBOARD_GET_CONTRACTS_REQUEST });
+  try {
+    const contracts = await apiGetAllContracts();
+    dispatch({
+      type: DASHBOARD_GET_CONTRACTS_SUCCESS,
+      payload: contracts
+    });
+  } catch (error) {
+    console.error(error); // tslint:disable-line
+    dispatch(notificationShow(error.message, true));
+    dispatch({ type: DASHBOARD_GET_CONTRACTS_FAILURE });
+  }
+};
+
+export const dashboardShowGroupsModal = (group?: IGroup) => async (
   dispatch: any
 ) =>
   dispatch(
     modalShow(GROUPS_MODAL, {
-      groupJson,
-      onAddItem: (groupJson: any) => {
-        if (groupJson) {
-          dispatch(modalHide());
-        }
-      },
-      onRemoveItem: (groupJson: any) => {
-        if (groupJson) {
+      group,
+      onAddItem: (group: IGroup, isNew: boolean) => {
+        if (group) {
+          // if (isNew) {
+          //   dispatch(dashboardCreateGroup(group));
+          // }
           dispatch(modalHide());
         }
       }
     })
   );
+
+export const dashboardGetProposals = () => async (
+  dispatch: any,
+  getState: any
+) => {
+  const { address } = getState().dashboard;
+  if (!address) {
+    return;
+  }
+  dispatch({ type: DASHBOARD_GET_PROPOSALS_REQUEST });
+  try {
+    const proposals = await apiGetAllProposals(address);
+    dispatch({
+      type: DASHBOARD_GET_PROPOSALS_SUCCESS,
+      payload: proposals
+    });
+  } catch (error) {
+    console.error(error); // tslint:disable-line
+    dispatch(notificationShow(error.message, true));
+    dispatch({ type: DASHBOARD_GET_PROPOSALS_FAILURE });
+  }
+};
 
 export const dashboardShowProposalsModal = (proposal?: any) => async (
   dispatch: any
@@ -101,11 +204,6 @@ export const dashboardShowProposalsModal = (proposal?: any) => async (
     modalShow(PROPOSALS_MODAL, {
       proposal,
       onAddItem: (proposal: any) => {
-        if (proposal) {
-          dispatch(modalHide());
-        }
-      },
-      onRemoveItem: (proposal: any) => {
         if (proposal) {
           dispatch(modalHide());
         }
@@ -133,6 +231,30 @@ export const dashboardShowContractsModal = (contract?: IContract) => async (
       }
     })
   );
+
+export const dashboardCreateGroup = (group: IGroup) => async (
+  dispatch: any,
+  getState: any
+) => {
+  dispatch({ type: DASHBOARD_CREATE_GROUP_REQUEST });
+
+  const groups = getState().dashboard;
+  try {
+    const result = await apiCreateGroup(group);
+    if (result) {
+      const newGroups = [...groups, group];
+
+      dispatch({ type: DASHBOARD_CREATE_GROUP_SUCCESS, newGroups });
+    } else {
+      dispatch(notificationShow(`Failed to create group`, true));
+      dispatch({ type: DASHBOARD_CREATE_GROUP_FAILURE });
+    }
+  } catch (error) {
+    console.error(error); // tslint:disable-line
+    dispatch(notificationShow(error.message, true));
+    dispatch({ type: DASHBOARD_CREATE_GROUP_FAILURE });
+  }
+};
 
 export const dashboardCreateContract = (contract: IContract) => async (
   dispatch: any,
@@ -214,14 +336,35 @@ export default (state = INITIAL_STATE, action: any) => {
         name: action.payload.name,
         address: action.payload.address,
         wallet: action.payload.wallet,
-        balances: action.payload.balances
+        balances: action.payload.balances,
+        groups: action.payload.groups,
+        contracts: action.payload.contracts,
+        proposals: action.payload.proposals
       };
     case DASHBOARD_AUTHENTICATE_FAILURE:
       return { ...state, loading: false };
+    case DASHBOARD_GET_GROUPS_REQUEST:
+    case DASHBOARD_CREATE_GROUP_REQUEST:
+      return { ...state, loading: true };
+    case DASHBOARD_GET_GROUPS_SUCCESS:
+    case DASHBOARD_CREATE_GROUP_SUCCESS:
+      return { ...state, loading: false, groups: action.payload };
+    case DASHBOARD_GET_GROUPS_FAILURE:
+    case DASHBOARD_CREATE_GROUP_FAILURE:
+      return { ...state, loading: false };
+    case DASHBOARD_GET_PROPOSALS_REQUEST:
+      return { ...state, loading: true };
+    case DASHBOARD_GET_PROPOSALS_SUCCESS:
+      return { ...state, loading: false, proposals: action.payload };
+    case DASHBOARD_GET_PROPOSALS_FAILURE:
+      return { ...state, loading: false };
+    case DASHBOARD_GET_CONTRACTS_REQUEST:
     case DASHBOARD_CREATE_CONTRACT_REQUEST:
       return { ...state, loading: true };
+    case DASHBOARD_GET_CONTRACTS_SUCCESS:
     case DASHBOARD_CREATE_CONTRACT_SUCCESS:
       return { ...state, loading: false, contracts: action.payload };
+    case DASHBOARD_GET_CONTRACTS_FAILURE:
     case DASHBOARD_CREATE_CONTRACT_FAILURE:
       return { ...state, loading: false };
     case DASHBOARD_UPDATE_NAME:

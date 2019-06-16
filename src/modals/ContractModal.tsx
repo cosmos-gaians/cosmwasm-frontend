@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import { IContract } from "../helpers/types";
+import { convertStringToNumber } from "../helpers/bignumber";
 
 const SSubmitWrapper = styled.div`
   width: 100%;
@@ -43,7 +44,7 @@ class ContractModal extends React.Component<
     funder: this.props.contract
       ? this.props.contract.funder
       : this.props.address,
-    payout: this.props.contract ? this.props.contract.payout : ""
+    payout: this.props.contract ? this.props.contract.payout : 0
   };
 
   public onSubmit = () => {
@@ -52,16 +53,25 @@ class ContractModal extends React.Component<
   };
 
   public render() {
-    const { isNew, isVerifier, verifier, beneficiary, payout } = this.state;
+    const {
+      isNew,
+      isVerifier,
+      verifier,
+      beneficiary,
+      funder,
+      payout
+    } = this.state;
     const action = isNew
       ? "Create Contract"
       : isVerifier
       ? "Verify Claim"
       : "Contract";
+    const readOnly = !isNew && !isVerifier;
     return (
       <React.Fragment>
         <h6>{action}</h6>
         <Input
+          readOnly={readOnly}
           type="text"
           label="Verifier"
           placeholder="Verifier"
@@ -70,6 +80,7 @@ class ContractModal extends React.Component<
         />
 
         <Input
+          readOnly={readOnly}
           type="text"
           label="Beneficiary"
           placeholder="Beneficiary"
@@ -77,12 +88,26 @@ class ContractModal extends React.Component<
           onChange={(e: any) => this.setState({ beneficiary: e.target.value })}
         />
 
+        {readOnly && funder && (
+          <Input
+            readOnly={readOnly}
+            type="text"
+            label="Funder"
+            placeholder="Funder"
+            value={funder}
+            onChange={(e: any) => this.setState({ funder: e.target.value })}
+          />
+        )}
+
         <Input
+          readOnly={readOnly}
           type="text"
           label="Payout"
           placeholder="Payout"
-          value={payout}
-          onChange={(e: any) => this.setState({ payout: e.target.value })}
+          value={`${payout}`}
+          onChange={(e: any) =>
+            this.setState({ payout: convertStringToNumber(payout) })
+          }
         />
 
         {(isNew || isVerifier) && (

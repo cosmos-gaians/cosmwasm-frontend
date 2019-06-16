@@ -14,10 +14,37 @@ export interface IContract {
   verifier: string;
   beneficiary: string;
   funder: string;
-  payout: string;
+  payout: number;
 }
 
-export interface ITokenBalance {
+export interface ITokenAmount {
   denom: string;
   amount: string;
+}
+
+export interface IGroupMember {
+  address: string;
+  weight: string;
+}
+
+export interface IGroup {
+  ID: string;
+  members: IGroupMember[];
+  decision_threshold: string;
+}
+
+export interface IProposalMessage {
+  type: string;
+  value: {
+    from_address: string;
+    to_address: string;
+    amount: ITokenAmount[];
+  };
+}
+
+export interface IProposal {
+  group: string;
+  proposer: string;
+  msgs: IProposalMessage;
+  approvers: string[];
 }

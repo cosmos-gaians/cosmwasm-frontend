@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { colors, fonts, transitions } from "../../styles";
+import { colors, fonts, shadows, transitions } from "../../styles";
 
 export const SListItemText = styled.div`
   width: 100%;
@@ -176,4 +176,41 @@ export const SSeparator = styled.div`
   border-bottom: 1px solid rgb(${colors.lightGrey});
   margin: 40px 0 20px !important;
   width: 100%;
+`;
+
+export const SListColumn = styled(SColumnList)`
+  overflow: visible;
+  padding: 0;
+`;
+
+interface IListItemStyleProps {
+  noShadow?: boolean;
+  onClick?: any;
+}
+
+export const SListItem = styled.div<IListItemStyleProps>`
+  cursor: ${({ onClick }) => (onClick ? "pointer" : "auto")};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0;
+  margin-bottom: 0;
+  padding: ${({ noShadow }) => (!noShadow ? "0.5em 0.75em" : "0")};
+  box-shadow: ${({ noShadow }) => (!noShadow ? shadows.medium : "none")};
+  &:last-child {
+    margin-bottom: 20px;
+  }
+`;
+
+interface IListColumnStyleProps {
+  width: number;
+  bold?: boolean;
+  alignRight?: boolean;
+}
+
+export const SListItemRow = styled.div<IListColumnStyleProps>`
+  width: ${({ width }) => `${width}%`};
+  font-weight: ${({ bold }) =>
+    bold ? fonts.weight.semibold : fonts.weight.medium};
+  text-align: ${({ alignRight }) => (alignRight ? "right" : "left")};
 `;

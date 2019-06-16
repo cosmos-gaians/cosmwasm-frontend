@@ -54,7 +54,7 @@ const SInput = styled.input<IInputStyleProps>`
   border-style: none;
   font-family: ${({ monospace }) =>
     monospace ? `${fonts.family.RobotoMono}` : `inherit`};
-  font-size: ${fonts.size.medium};
+  font-size: ${({ readOnly }) => (!readOnly ? fonts.size.medium : "0.9em")};
   font-weight: ${fonts.weight.semibold};
   font-style: normal;
   font-stretch: normal;

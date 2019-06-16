@@ -108,7 +108,7 @@ const SCard = styled.div<ICardStyleProps>`
 const SModalContent = styled(SCenterColumn)`
   position: relative;
   word-wrap: break-word;
-  padding: 20px;
+  /* padding: 20px; */
 `;
 
 interface IModalState {
