@@ -17,7 +17,6 @@ import {
   apiCreateGroup,
   apiGetAllProposals
 } from "../helpers/api";
-import { async } from "q";
 
 // -- Constants ------------------------------------------------------------- //
 const DASHBOARD_AUTHENTICATE_REQUEST =
@@ -142,7 +141,7 @@ export const dashboardSubscribeToUpdates = () => async (
   clearInterval(dataInterval);
 
   async function fetchData() {
-    const { address } = getState();
+    const { address } = getState().dashboard;
     dispatch({ type: DASHBOARD_UPDATE_DATA_REQUEST });
     try {
       const { balances, groups, contracts, proposals } = await getAllData(
