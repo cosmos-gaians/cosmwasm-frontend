@@ -17,6 +17,7 @@ import {
   apiCreateGroup,
   apiGetAllProposals
 } from "../helpers/api";
+import { async } from "q";
 
 // -- Constants ------------------------------------------------------------- //
 const DASHBOARD_AUTHENTICATE_REQUEST =
@@ -25,6 +26,10 @@ const DASHBOARD_AUTHENTICATE_SUCCESS =
   "dashboard/DASHBOARD_AUTHENTICATE_SUCCESS";
 const DASHBOARD_AUTHENTICATE_FAILURE =
   "dashboard/DASHBOARD_AUTHENTICATE_FAILURE";
+
+const DASHBOARD_UPDATE_DATA_REQUEST = "dashboard/DASHBOARD_UPDATE_DATA_REQUEST";
+const DASHBOARD_UPDATE_DATA_SUCCESS = "dashboard/DASHBOARD_UPDATE_DATA_SUCCESS";
+const DASHBOARD_UPDATE_DATA_FAILURE = "dashboard/DASHBOARD_UPDATE_DATA_FAILURE";
 
 const DASHBOARD_GET_GROUPS_REQUEST = "dashboard/DASHBOARD_GET_GROUPS_REQUEST";
 const DASHBOARD_GET_GROUPS_SUCCESS = "dashboard/DASHBOARD_GET_GROUPS_SUCCESS";
@@ -71,6 +76,15 @@ const DASHBOARD_CLEAR_STATE = "dashboard/DASHBOARD_CLEAR_STATE";
 
 // -- Actions --------------------------------------------------------------- //
 
+let dataInterval: any;
+
+async function getAllData(address: string) {
+  const groups = await apiGetGroups(address);
+  const contracts = await apiGetAllContracts();
+  const proposals = await apiGetAllProposals(address);
+  return { groups, contracts, proposals };
+}
+
 export const dashboardShowAuthenticateModal = () => async (dispatch: any) =>
   dispatch(modalShow(AUTHENTICATE_MODAL, { keys: loadKeys() }));
 
@@ -91,9 +105,7 @@ export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
       dispatch(notificationShow(`Failed to get balances`, true));
     }
 
-    const groups = await apiGetGroups(address);
-    const contracts = await apiGetAllContracts();
-    const proposals = await apiGetAllProposals(address);
+    const { groups, contracts, proposals } = await getAllData(address);
 
     dispatch({
       type: DASHBOARD_AUTHENTICATE_SUCCESS,
@@ -107,11 +119,42 @@ export const dashboardAuthenticate = (name: string, wallet: IWallet) => async (
         proposals
       }
     });
+
+    dispatch(dashboardSubscribeToUpdates());
   } catch (error) {
     console.error(error); // tslint:disable-line
     dispatch(notificationShow(error.message, true));
     dispatch({ type: DASHBOARD_AUTHENTICATE_FAILURE });
   }
+};
+
+export const dashboardSubscribeToUpdates = () => async (
+  dispatch: any,
+  getState: any
+) => {
+  clearInterval(dataInterval);
+
+  async function fetchData() {
+    const { address } = getState();
+    dispatch({ type: DASHBOARD_UPDATE_DATA_REQUEST });
+    try {
+      const { groups, contracts, proposals } = await getAllData(address);
+      dispatch({
+        type: DASHBOARD_UPDATE_DATA_SUCCESS,
+        payload: {
+          groups,
+          contracts,
+          proposals
+        }
+      });
+    } catch (error) {
+      console.error(error); // tslint:disable-line
+      dispatch(notificationShow(error.message, true));
+      dispatch({ type: DASHBOARD_UPDATE_DATA_FAILURE });
+    }
+  }
+
+  dataInterval = setInterval(fetchData, 1000);
 };
 
 export const dashboardGetGroups = () => async (
@@ -343,6 +386,13 @@ export default (state = INITIAL_STATE, action: any) => {
       };
     case DASHBOARD_AUTHENTICATE_FAILURE:
       return { ...state, loading: false };
+    case DASHBOARD_UPDATE_DATA_SUCCESS:
+      return {
+        ...state,
+        groups: action.payload.groups,
+        contracts: action.payload.contracts,
+        proposals: action.payload.proposals
+      };
     case DASHBOARD_GET_GROUPS_REQUEST:
     case DASHBOARD_CREATE_GROUP_REQUEST:
       return { ...state, loading: true };

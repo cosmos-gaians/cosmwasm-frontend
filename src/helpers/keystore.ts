@@ -20,10 +20,8 @@ export function loadKeys(): IKeyStore[] {
 
 export function getKey(name: string, password: string) {
   const keys = loadKeys();
-  console.log("[getKey] keys", keys); // tslint:disable-line
 
   const key = keys.find(key => key.name === name);
-  console.log("[getKey] key", key); // tslint:disable-line
   if (!key) {
     throw new Error(`Couldn't find key with name: ${name}`);
   }
@@ -79,10 +77,7 @@ export function addNewKey(
   password: string,
   randomBytesFunc = standardRandomBytesFunc
 ) {
-  console.log("[addNewKey] name", name); // tslint:disable-line
-  console.log("[addNewKey] password", password); // tslint:disable-line
   const wallet = generateWallet(randomBytesFunc);
-  console.log("[addNewKey] wallet", wallet); // tslint:disable-line
   addKey(wallet, name, password);
 
   return wallet;
