@@ -8,8 +8,8 @@ import {
 } from "../constants/modals";
 import { logRedux } from "../helpers/dev";
 import { loadKeys } from "../helpers/keystore";
-import { IWallet, ITokenBalance } from "../helpers/types";
-import { apiGetBalances } from "../helpers/api";
+import { IWallet, ITokenBalance, IContract } from "../helpers/types";
+import { apiGetBalances, apiCreateContract } from "../helpers/api";
 
 // -- Constants ------------------------------------------------------------- //
 const DASHBOARD_AUTHENTICATE_REQUEST =
@@ -18,6 +18,20 @@ const DASHBOARD_AUTHENTICATE_SUCCESS =
   "dashboard/DASHBOARD_AUTHENTICATE_SUCCESS";
 const DASHBOARD_AUTHENTICATE_FAILURE =
   "dashboard/DASHBOARD_AUTHENTICATE_FAILURE";
+
+const DASHBOARD_CREATE_CONTRACT_REQUEST =
+  "dashboard/DASHBOARD_CREATE_CONTRACT_REQUEST";
+const DASHBOARD_CREATE_CONTRACT_SUCCESS =
+  "dashboard/DASHBOARD_CREATE_CONTRACT_SUCCESS";
+const DASHBOARD_CREATE_CONTRACT_FAILURE =
+  "dashboard/DASHBOARD_CREATE_CONTRACT_FAILURE";
+
+const DASHBOARD_VERIFY_CLAIM_REQUEST =
+  "dashboard/DASHBOARD_VERIFY_CLAIM_REQUEST";
+const DASHBOARD_VERIFY_CLAIM_SUCCESS =
+  "dashboard/DASHBOARD_VERIFY_CLAIM_SUCCESS";
+const DASHBOARD_VERIFY_CLAIM_FAILURE =
+  "dashboard/DASHBOARD_VERIFY_CLAIM_FAILURE";
 
 const DASHBOARD_UPDATE_NAME = "dashboard/DASHBOARD_UPDATE_NAME";
 
@@ -99,24 +113,74 @@ export const dashboardShowProposalsModal = (proposal?: any) => async (
     })
   );
 
-export const dashboardShowContractsModal = (contract?: any) => async (
-  dispatch: any
+export const dashboardShowContractsModal = (contract?: IContract) => async (
+  dispatch: any,
+  getState: any
 ) =>
   dispatch(
     modalShow(CONTRACTS_MODAL, {
+      address: getState().dashboard.address,
       contract,
-      onAddItem: (contract: any) => {
+      onAddItem: (contract: IContract, isNew: boolean) => {
         if (contract) {
-          dispatch(modalHide());
-        }
-      },
-      onRemoveItem: (contract: any) => {
-        if (contract) {
+          if (isNew) {
+            dispatch(dashboardCreateContract(contract));
+          } else {
+            dispatch(dashboardVerifyClaim(contract));
+          }
           dispatch(modalHide());
         }
       }
     })
   );
+
+export const dashboardCreateContract = (contract: IContract) => async (
+  dispatch: any,
+  getState: any
+) => {
+  dispatch({ type: DASHBOARD_CREATE_CONTRACT_REQUEST });
+
+  const contracts = getState().dashboard;
+  try {
+    const result = await apiCreateContract(contract);
+    if (result) {
+      const newContracts = [...contracts, contract];
+
+      dispatch({ type: DASHBOARD_CREATE_CONTRACT_SUCCESS, newContracts });
+    } else {
+      dispatch(notificationShow(`Failed to create contract`, true));
+      dispatch({ type: DASHBOARD_CREATE_CONTRACT_FAILURE });
+    }
+  } catch (error) {
+    console.error(error); // tslint:disable-line
+    dispatch(notificationShow(error.message, true));
+    dispatch({ type: DASHBOARD_CREATE_CONTRACT_FAILURE });
+  }
+};
+
+export const dashboardVerifyClaim = (contract: IContract) => async (
+  dispatch: any,
+  getState: any
+) => {
+  dispatch({ type: DASHBOARD_VERIFY_CLAIM_REQUEST });
+
+  const contracts = getState().dashboard;
+  try {
+    const result = await apiCreateContract(contract);
+    if (result) {
+      const newContracts = [...contracts, contract];
+
+      dispatch({ type: DASHBOARD_VERIFY_CLAIM_SUCCESS, newContracts });
+    } else {
+      dispatch(notificationShow(`Failed to create contract`, true));
+      dispatch({ type: DASHBOARD_VERIFY_CLAIM_FAILURE });
+    }
+  } catch (error) {
+    console.error(error); // tslint:disable-line
+    dispatch(notificationShow(error.message, true));
+    dispatch({ type: DASHBOARD_VERIFY_CLAIM_FAILURE });
+  }
+};
 
 export const dashboardUpdateName = (name: string) => ({
   type: DASHBOARD_UPDATE_NAME,
@@ -153,6 +217,12 @@ export default (state = INITIAL_STATE, action: any) => {
         balances: action.payload.balances
       };
     case DASHBOARD_AUTHENTICATE_FAILURE:
+      return { ...state, loading: false };
+    case DASHBOARD_CREATE_CONTRACT_REQUEST:
+      return { ...state, loading: true };
+    case DASHBOARD_CREATE_CONTRACT_SUCCESS:
+      return { ...state, loading: false, contracts: action.payload };
+    case DASHBOARD_CREATE_CONTRACT_FAILURE:
       return { ...state, loading: false };
     case DASHBOARD_UPDATE_NAME:
       return { ...state, name: action.payload };

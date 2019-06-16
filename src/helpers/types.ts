@@ -10,11 +10,11 @@ export interface IKeyStore {
   wallet: string;
 }
 
-export interface IProposalJson {
-  id: string;
-  timestamp: number;
-  type: string;
-  threshold: number;
+export interface IContract {
+  verifier: string;
+  beneficiary: string;
+  funder: string;
+  payout: string;
 }
 
 export interface ITokenBalance {

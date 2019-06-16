@@ -2,6 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import Input from "../components/Input";
 import Button from "../components/Button";
+import { IContract } from "../helpers/types";
 
 const SSubmitWrapper = styled.div`
   width: 100%;
@@ -18,71 +19,77 @@ const SSubmitWrapper = styled.div`
 `;
 
 interface IContractModalProps {
-  contract: any;
-  onAddItem: (contract: any) => void;
-  onRemoveItem: (contract: any) => void;
+  address: string;
+  contract: IContract;
+  onAddItem: (contract: IContract, isNew: boolean) => void;
 }
 
-class ContractModal extends React.Component<IContractModalProps, any> {
-  public state = {
-    id: this.props.contract ? this.props.contract.id : "",
-    name: this.props.contract ? this.props.contract.name : "",
-    description: this.props.contract ? this.props.contract.description : "",
-    price: this.props.contract ? this.props.contract.price : 0,
-    image: this.props.contract ? this.props.contract.image : ""
-  };
+interface IContractModalState extends IContract {
+  isNew: boolean;
+  isVerifier: boolean;
+}
 
-  public updateState = (updatedContractJson: any) =>
-    this.setState({ ...this.state, ...updatedContractJson });
+class ContractModal extends React.Component<
+  IContractModalProps,
+  IContractModalState
+> {
+  public state = {
+    isNew: !this.props.contract,
+    isVerifier: this.props.contract
+      ? this.props.contract.verifier === this.props.address
+      : false,
+    verifier: this.props.contract ? this.props.contract.verifier : "",
+    beneficiary: this.props.contract ? this.props.contract.beneficiary : "",
+    funder: this.props.contract
+      ? this.props.contract.funder
+      : this.props.address,
+    payout: this.props.contract ? this.props.contract.payout : ""
+  };
 
   public onSubmit = () => {
-    const { id, name, description, price, image } = this.state;
-    this.props.onAddItem({ id, name, description, price, image });
-  };
-
-  public onRemove = () => {
-    const { id, name, description, price, image } = this.state;
-    this.props.onRemoveItem({ id, name, description, price, image });
+    const { isNew, verifier, beneficiary, funder, payout } = this.state;
+    this.props.onAddItem({ verifier, beneficiary, funder, payout }, isNew);
   };
 
   public render() {
+    const { isNew, isVerifier, verifier, beneficiary, payout } = this.state;
+    const action = isNew
+      ? "Create Contract"
+      : isVerifier
+      ? "Verify Claim"
+      : "Contract";
     return (
       <React.Fragment>
-        <h6>{`Create Contract`}</h6>
+        <h6>{action}</h6>
         <Input
           type="text"
-          label="Name"
-          placeholder="Contract name"
-          value={this.state.name}
-          onChange={(e: any) => {
-            const name = e.target.value;
-            const id = name;
-            this.updateState({ name, id });
-          }}
+          label="Verifier"
+          placeholder="Verifier"
+          value={verifier}
+          onChange={(e: any) => this.setState({ verifier: e.target.value })}
         />
 
         <Input
           type="text"
-          label="Description"
-          placeholder="Contract description"
-          value={this.state.description}
-          onChange={(e: any) =>
-            this.updateState({
-              description: e.target.value
-            })
-          }
+          label="Beneficiary"
+          placeholder="Beneficiary"
+          value={beneficiary}
+          onChange={(e: any) => this.setState({ beneficiary: e.target.value })}
         />
 
-        <SSubmitWrapper>
-          {this.props.contract ? (
-            <React.Fragment>
-              <Button color={`red`} onClick={this.onRemove}>{`Delete`}</Button>
-              <Button onClick={this.onSubmit}>{`Update`}</Button>
-            </React.Fragment>
-          ) : (
-            <Button onClick={this.onSubmit}>{`Submit`}</Button>
-          )}
-        </SSubmitWrapper>
+        <Input
+          type="text"
+          label="Payout"
+          placeholder="Payout"
+          value={payout}
+          onChange={(e: any) => this.setState({ payout: e.target.value })}
+        />
+
+        {(isNew || isVerifier) && (
+          <SSubmitWrapper>
+            <Button onClick={this.onSubmit}>{action}</Button>
+          </SSubmitWrapper>
+        )}
       </React.Fragment>
     );
   }
